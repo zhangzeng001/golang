@@ -9,3 +9,5 @@
 
 ## 字符串、数组、切片、map
 
+[字符串、数组、切片、map](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E6%80%BB%E7%BB%931.md)
+
