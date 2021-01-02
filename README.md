@@ -23,3 +23,8 @@
 
 # 指针
 
+[指针](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E6%8C%87%E9%92%88.md)
+
+# 结构体
+
+[结构体](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E7%BB%93%E6%9E%84%E4%BD%93.md)
