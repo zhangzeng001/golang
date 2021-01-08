@@ -3,8 +3,6 @@
 
 
 
-
-
 # 总结
 
 ## 字符串、数组、切片、map
@@ -29,15 +27,23 @@
 
 [结构体](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E7%BB%93%E6%9E%84%E4%BD%93.md)
 
+# Go语言接口
+
+[接口](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E6%8E%A5%E5%8F%A3.md)
+
 # json转换
 
 [json转换](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/json%E8%BD%AC%E6%8D%A2.md)
 
 # Go语言包
 
-[包]()
+[包](https://github.com/zhangzeng001/notes/blob/master/%E7%AC%94%E8%AE%B0/%E5%8C%85.md)
 
-# Go语言接口
+# 文件操作
 
-[接口]()
+[文件操作]()
+
+
+
+
 
