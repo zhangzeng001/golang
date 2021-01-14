@@ -425,6 +425,39 @@ func (t Time) After(u Time) bool
 
 
 
+## 时间比较
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+type mytimer struct {
+	logtime time.Time
+}
+
+func main() {
+	now := time.Now()
+	var time1 = mytimer{logtime: now}
+	for{
+		// 判断当前时间是否在定义时间time1之后的6秒
+		res := time1.logtime.Add(6 * time.Second).Before(time.Now())
+		fmt.Println(res)
+		fmt.Println("before--------------",time.Now())
+		fmt.Println("struct--------------",time1.logtime)
+		if res {
+			time1.logtime = time.Now()
+		}
+		time.Sleep(1*time.Second)
+	}
+}
+```
+
+
+
 ## 时间类型转换
 
 ```go
