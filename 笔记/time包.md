@@ -85,6 +85,8 @@ const (
 
 ## 格式化时间
 
+`func (t Time) Format(layout string) string`
+
 时间类型有一个自带的方法`Format`进行格式化，需要注意的是Go语言中格式化时间模板不是常见的`Y-m-d H:M:S`而是使用Go的诞生时间2006年1月2号15点04分（记忆口诀为2006 1 2 3 4）。也许这就是技术人员的浪漫吧。
 
 补充：如果想格式化为12小时方式，需指定`PM`。
@@ -270,6 +272,16 @@ func main() {
 }
 ```
 
+#### 转UTC时间
+
+`func (t Time) UTC() Time`
+
+```go
+t1 := time.Now()
+fmt.Println(t1.Local()) // 2021-01-21 12:17:04.5251108 +0800 CST
+fmt.Println(t1.UTC())   // 2021-01-21 04:17:04.5251108 +0000 UTC
+```
+
 
 
 ## 定时器
@@ -422,6 +434,14 @@ func (t Time) After(u Time) bool
 ```
 
 如果t代表的时间点在u之后，返回真；否则返回假。
+
+**区别去sleep包下的After**
+
+ `time.After()`表示`time.Duration`长的时候后返回一条`time.Time`类型的通道消息。那么，基于这个函数，就相当于实现了定时器，且是无阻塞的。 
+
+```go
+func After(d Duration) <-chan Time
+```
 
 
 

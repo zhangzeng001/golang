@@ -184,6 +184,69 @@ zhang3
 
 
 
+# gitee例子
+
+gitee例子：
+    定义传参变量
+    init初始化
+    flag.Parse()
+    判断帮助信息，打印 flag.Usage()
+
+```go
+package main
+
+import (
+	"flag"
+	"fmt"
+	"os"
+	"os/signal"
+	"runtime"
+	"strings"
+	"syscall"
+
+	appmonitor "gitee.com/eehut/appmonitor-go"
+	"gitee.com/eehut/appmonitor-go/monitor"
+
+	_ "net/http/pprof"
+)
+
+var (
+	processes    string
+	influxAddr   string
+	dbName       string
+	period       int
+	saveToDb     bool
+	printHelp    bool
+	printVersion bool
+)
+
+func init() {
+
+	flag.IntVar(&period, "i", 10, "Set polling `period` in seconds")
+	flag.BoolVar(&saveToDb, "d", false, "Save data to database(influxdb only)")
+	flag.StringVar(&processes, "p", "", "Set `processes` for monitor")
+	flag.StringVar(&influxAddr, "u", "http://localhost:8086", "Output data to influxdb with `url`")
+	flag.StringVar(&dbName, "n", "appmon", "Set database `name`")
+	flag.BoolVar(&printHelp, "h", false, "Print this help")
+	flag.BoolVar(&printVersion, "v", false, "Print version")
+}
+
+func main() {
+
+	flag.Parse()
+
+	if printHelp {
+		flag.Usage()
+
+		os.Exit(0)
+	} else if printVersion {
+		fmt.Printf("%s\n", appmonitor.Version)
+		os.Exit(0)
+	}
+```
+
+
+
 ## 传参模拟copy命令
 
 [文件操作]()
