@@ -1,5 +1,20 @@
 # time包
 
+| Timestamp component | Format value                                                 |
+| :------------------ | :----------------------------------------------------------- |
+| Year                | `06`, `2006`                                                 |
+| Month               | `1`, `01`, `Jan`, `January`                                  |
+| Day                 | `2`, `02`, `_2` (two digits right justified)                 |
+| Day of the week     | `Mon`, `Monday`                                              |
+| Hour                | `3` (12-hour), `03` (12-hour zero prefixed), `15` (24-hour)  |
+| Minute              | `4`, `04`                                                    |
+| Second              | `5`, `05`                                                    |
+| Fraction of second  | `.000` (ms zero prefixed), `.000000` (μs), `.000000000` (ns), `.999` (ms without trailing zeroes), `.999999` (μs), `.999999999` (ns) |
+| 12-hour period      | `pm`, `PM`                                                   |
+| Timezone name       | `MST`                                                        |
+| Timezone offset     | `-0700`, `-070000` (with seconds), `-07`, `07:00`, `-07:00:00` (with seconds) |
+| Timezone ISO-8601   | `Z0700` (Z for UTC or time offset), `Z070000`, `Z07`, `Z07:00`, `Z07:00:00` |
+
 ## 时间类型 time.Time
 
 `time.Time`类型表示时间，通过`time.Now()`函数获取当前的时间对象，通过这个时间对象再去获取时、分、秒信息
@@ -125,7 +140,18 @@ const (
 )
 ```
 
-
+```go
+func main() {
+	TIME_LAYOUT := "Jan 2 15:04:05 -0700"
+	res, err := time.Parse(TIME_LAYOUT, "Jan  9 23:59:59 +0800")
+	if err != nil {
+		fmt.Println("err---",err)
+		return
+	}
+	//res = res.Add(-8*time.Hour)
+	fmt.Println(res) // 0000-01-09 23:59:59 +0800 CST
+}
+```
 
 
 
