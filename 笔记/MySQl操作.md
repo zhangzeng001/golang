@@ -109,6 +109,15 @@ db.SetMaxIdleConns(30)
 
 ## 增删改查 CURD
 
+ 不同的数据库中，SQL语句使用的占位符语法不尽相同。 
+
+|   数据库   |  占位符语法  |
+| :--------: | :----------: |
+|   MySQL    |     `?`      |
+| PostgreSQL | `$1`, `$2`等 |
+|   SQLite   |  `?` 和`$1`  |
+|   Oracle   |   `:name`    |
+
 ### 建库建表
 
 我们先在MySQL中创建一个名为`sql_test`的数据库
@@ -488,6 +497,202 @@ func updateRow(){
 ```
 
 
+
+## MySQL预处理
+
+### 什么是预处理？
+
+普通SQL语句执行过程：
+
+1. 客户端对SQL语句进行占位符替换得到完整的SQL语句。
+2. 客户端发送完整SQL语句到MySQL服务端
+3. MySQL服务端执行完整的SQL语句并将结果返回给客户端。
+
+预处理执行过程：
+
+1. 把SQL语句分成两部分，命令部分与数据部分。
+2. 先把命令部分发送给MySQL服务端，MySQL服务端进行SQL预处理。
+3. 然后把数据部分发送给MySQL服务端，MySQL服务端对SQL语句进行占位符替换。
+4. MySQL服务端执行完整的SQL语句并将结果返回给客户端。
+
+### 为什么要预处理？
+
+1. 优化MySQL服务器重复执行SQL的方法，可以提升服务器性能，提前让服务器编译，一次编译多次执行，节省后续编译的成本。
+2. 避免SQL注入问题。
+
+### Go实现MySQL预处理
+
+`database/sql`中使用下面的`Prepare`方法来实现预处理操作。
+
+```go
+func (db *DB) Prepare(query string) (*Stmt, error)
+```
+
+`Prepare`方法会先将sql语句发送给MySQL服务端，返回一个准备好的状态用于之后的查询和命令。返回值可以同时执行多个查询和命令。
+
+查询操作的预处理示例代码如下：
+
+```go
+// 预处理查询示例
+func prepareQueryDemo() {
+	sqlStr := "select id, name, age from user where id > ?"
+	stmt, err := db.Prepare(sqlStr)
+	if err != nil {
+		fmt.Printf("prepare failed, err:%v\n", err)
+		return
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(0)
+	if err != nil {
+		fmt.Printf("query failed, err:%v\n", err)
+		return
+	}
+	defer rows.Close()
+	// 循环读取结果集中的数据
+	for rows.Next() {
+		var u user
+		err := rows.Scan(&u.id, &u.name, &u.age)
+		if err != nil {
+			fmt.Printf("scan failed, err:%v\n", err)
+			return
+		}
+		fmt.Printf("id:%d name:%s age:%d\n", u.id, u.name, u.age)
+	}
+}
+```
+
+插入、更新和删除操作的预处理十分类似，这里以插入操作的预处理为例：
+
+```go
+// 预处理插入示例
+func prepareInsertDemo() {
+	sqlStr := "insert into user(name, age) values (?,?)"
+	stmt, err := db.Prepare(sqlStr)
+	if err != nil {
+		fmt.Printf("prepare failed, err:%v\n", err)
+		return
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec("小王子", 18)
+	if err != nil {
+		fmt.Printf("insert failed, err:%v\n", err)
+		return
+	}
+	_, err = stmt.Exec("沙河娜扎", 18)
+	if err != nil {
+		fmt.Printf("insert failed, err:%v\n", err)
+		return
+	}
+	fmt.Println("insert success.")
+}
+```
+
+### SQL注入问题
+
+**我们任何时候都不应该自己拼接SQL语句！**
+
+这里我们演示一个自行拼接SQL语句的示例，编写一个根据name字段查询user表的函数如下：
+
+```go
+// sql注入示例
+func sqlInjectDemo(name string) {
+	sqlStr := fmt.Sprintf("select id, name, age from user where name='%s'", name)
+	fmt.Printf("SQL:%s\n", sqlStr)
+	var u user
+	err := db.QueryRow(sqlStr).Scan(&u.id, &u.name, &u.age)
+	if err != nil {
+		fmt.Printf("exec failed, err:%v\n", err)
+		return
+	}
+	fmt.Printf("user:%#v\n", u)
+}
+```
+
+此时以下输入字符串都可以引发SQL注入问题：
+
+```go
+sqlInjectDemo("xxx' or 1=1#")
+sqlInjectDemo("xxx' union select * from user #")
+sqlInjectDemo("xxx' and (select count(*) from user) <10 #")
+```
+
+
+
+## Go实现MySQL事务
+
+### 事务相关方法
+
+Go语言中使用以下三个方法实现MySQL中的事务操作。 开始事务
+
+```go
+func (db *DB) Begin() (*Tx, error)
+```
+
+提交事务
+
+```go
+func (tx *Tx) Commit() error
+```
+
+回滚事务
+
+```go
+func (tx *Tx) Rollback() error
+```
+
+示例：
+
+```go
+// 事务操作示例
+func transactionDemo() {
+	tx, err := db.Begin() // 开启事务
+	if err != nil {
+		if tx != nil {
+			tx.Rollback() // 回滚
+		}
+		fmt.Printf("begin trans failed, err:%v\n", err)
+		return
+	}
+	sqlStr1 := "Update user set age=30 where id=?"
+	ret1, err := tx.Exec(sqlStr1, 2)
+	if err != nil {
+		tx.Rollback() // 回滚
+		fmt.Printf("exec sql1 failed, err:%v\n", err)
+		return
+	}
+	affRow1, err := ret1.RowsAffected()
+	if err != nil {
+		tx.Rollback() // 回滚
+		fmt.Printf("exec ret1.RowsAffected() failed, err:%v\n", err)
+		return
+	}
+
+	sqlStr2 := "Update user set age=40 where id=?"
+	ret2, err := tx.Exec(sqlStr2, 3)
+	if err != nil {
+		tx.Rollback() // 回滚
+		fmt.Printf("exec sql2 failed, err:%v\n", err)
+		return
+	}
+	affRow2, err := ret2.RowsAffected()
+	if err != nil {
+		tx.Rollback() // 回滚
+		fmt.Printf("exec ret1.RowsAffected() failed, err:%v\n", err)
+		return
+	}
+
+	fmt.Println(affRow1, affRow2)
+	if affRow1 == 1 && affRow2 == 1 {
+		fmt.Println("事务提交啦...")
+		tx.Commit() // 提交事务
+	} else {
+		tx.Rollback()
+		fmt.Println("事务回滚啦...")
+	}
+
+	fmt.Println("exec trans success!")
+}
+```
 
 
 

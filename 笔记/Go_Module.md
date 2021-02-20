@@ -157,8 +157,15 @@ replace (
 在项目中执行`go get`命令可以下载依赖包，并且还可以指定下载的版本。
 
 1. 运行`go get -u`将会升级到最新的次要版本或者修订版本(x.y.z, z是修订版本号， y是次要版本号)
+
 2. 运行`go get -u=patch`将会升级到最新的修订版本
+
 3. 运行`go get package@version`将会升级到指定的版本号version
+
+   ```shell
+   // 下载指定版本
+   go get k8s.io/klog@v1.0.0
+   ```
 
 如果下载所有依赖可以使用`go mod download`命令。
 
