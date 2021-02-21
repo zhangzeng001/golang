@@ -24,7 +24,7 @@ import (
 const (
 	MailServerHost = "smtp.163.com"        // smtp地址
 	MailServerPort = 465                   // smtp服务器端口
-	MailServerUser = "18576749166@163.com" // smtp发送用户
+	MailServerUser = "1@163.com" // smtp发送用户
 	MailServerpass = ""            // smtp用户密码
 )
 
@@ -69,8 +69,8 @@ import (
 const (
 	MailServerHost     = "smtp.163.com"        // smtp地址
 	MailServerPort     = 465                   // smtp服务器端口
-	MailServerUser     = "18576749166@163.com" // smtp发送用户
-	MailServerpass     = "s6810733"            // smtp用户密码
+	MailServerUser     = "1@163.com" // smtp发送用户
+	MailServerpass     = ""            // smtp用户密码
 	MailServerNickname = "zhang"               // 发件人别名，注意中文乱码
 )
 
