@@ -184,6 +184,48 @@ zhang3
 
 
 
+## 执行路劲、文件名
+
+```go
+if configName == "unknown"{
+    dirName1,_ := filepath.Abs(os.Args[0])
+    dirName2 := filepath.Dir(os.Args[0])
+    fmt.Println("绝对路径",dirName1)
+    fmt.Println("相对路劲",dirName2)
+    fmt.Println(os.Args[0])
+    os.Exit(1)
+}
+```
+
+
+
+```go
+func Argsconfig(){
+	flag.Parse()
+	if printHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+	if configName == "unknown"{
+		//fmt.Println("USAGE:",os.Args[0],"--help")
+		flag.Usage()
+		os.Exit(1)
+	}
+}
+```
+
+结果：
+
+```shell
+C:\Users\Administrator\go\src\awesomeProject\log_agent>log_agent.exe
+Usage of log_agent.exe:
+  -config string
+        --config /dir/config.ini (default "unknown")
+  -h    Print this help
+```
+
+
+
 # gitee例子
 
 gitee例子：

@@ -130,7 +130,7 @@ ted protocol scheme \"\"","stacktrace":"main.simpleHttpGet\n\tD:/go_code/src/zap
 现在让我们使用Sugared Logger来实现相同的功能。
 
 - 大部分的实现基本都相同。
-- 惟一的区别是，我们通过调用主logger的`. Sugar()`方法来获取一个`SugaredLogger`。
+- 惟一的区别是，我们通过调用主logger的`.Sugar()`方法来获取一个`SugaredLogger`。
 - 然后使用`SugaredLogger`以`printf`格式记录语句
 
 在性能不错但不是很关键的情况下，请使用`SugaredLogger`。它比其他结构化日志记录包快4-10倍，并且支持结构化和`printf`样式的日志记录 
@@ -377,6 +377,7 @@ func InitLogger() {
 	// 构建New(core)
 	writeSyncer := getLogWriter()
 	encoder := getEncoder()
+    // zapcore.DebugLevel要输出的日志级别
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 	// zap.AddCaller() 打印函数
 	logger := zap.New(core,zap.AddCaller())
@@ -412,6 +413,72 @@ func main() {
 2021-02-15T14:38:32.891+0800	info	zap_logger/main.go:45	Success! statusCode = 200 OK for URL http://www.baidu.com
 ```
 
+### 修改时间格式
+
+```go
+EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+			enc.AppendString(t.Format("2006-01-02 15:04:05"))
+		},
+```
+
+## 增加自定义字段和值
+
+### **with方式**
+
+```
+func (s *SugaredLogger) With(args ...interface{}) *SugaredLogger
+```
+
+```go
+...
+// InitLogger 初始化日志对象
+func (z *zaplogger)InitLogger() *zap.SugaredLogger {
+	// 构建New(core)
+	writeSyncer := getLogWriter(z.logpath,z.isConsole)
+	encoder := getEncoder(z.isConsole)
+	core := zapcore.NewCore(encoder, writeSyncer, z.level)
+	//core := zapcore.NewCore(encoder,  zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout)), z.level)
+	// zap.AddCaller() 打印函数
+	logger := zap.New(core,zap.AddCaller())
+	// 获取sugar对象
+	sugarLogger := logger.Sugar()
+	return sugarLogger
+}
+...
+
+logger := logobj.InitLogger()
+logger2 := logger.With( "hello", "world",
+			    "failure", errors.New("oh no"),
+			    "count", 42,
+			    "user", "zhang3")
+		logger2.Info("xxxx")
+```
+
+结果：
+
+```json
+{"level":"INFO","ts":"2021-02-25 16:06:01","caller":"log_agent/main.go:46","msg":"xxxx","hello":"world","failure":"oh no","count":42,"user":"zhang3"}
+```
+
+
+
+### infow方式
+
+```go
+sugar.Infow("failed to fetch URL",
+		// Structured context as loosely typed key-value pairs.
+		"url", url,
+		"attempt", 3,
+		"backoff", time.Second,
+	)
+```
+
+```
+{"level":"INFO","ts":"2021-02-25 16:13:20","caller":"log_agent/main.go:41","msg":"Infow自定义字段日志","name":"zhang3","age":12}
+```
+
+
+
 ## 使用Lumberjack进行日志切割归档
 
 使用第三方库[Lumberjack](https://github.com/natefinch/lumberjack)来实现。  日志切割归档功能
@@ -432,7 +499,7 @@ Lumberjack Logger采用以下属性作为输入:
 
 - Filename: 日志文件的位置
 - MaxSize：在进行切割之前，日志文件的最大大小（以MB为单位）
-- MaxBackups：保留旧文件的最大个数
+- MaxBackups：保留旧文件的最大个数，0无限制，与maxAge互相影响
 - MaxAges：保留旧文件的最大天数
 - Compress：是否压缩/归档旧文件
 
@@ -441,8 +508,8 @@ func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   "./test.log", // 日志文件路径
 		MaxSize:    10,           // 每个日志文件保存的大小 单位:M
-		MaxBackups: 5,            // 文件最多保存多少天
-		MaxAge:     30,           // 日志文件最多保存多少个备份
+		MaxBackups: 5,            // 日志文件最多保存多少个备份,0无限制，与maxAge互相影响
+		MaxAge:     30,           // 日志文件最多保存多少天
 		Compress:   false,        // 是否压缩
 	}
 	return zapcore.AddSync(lumberJackLogger)
@@ -476,6 +543,7 @@ func main() {
 func InitLogger() {
 	writeSyncer := getLogWriter()
 	encoder := getEncoder()
+    // zapcore.DebugLevel要输出的日志级别
 	core := zapcore.NewCore(encoder, writeSyncer, zapcore.DebugLevel)
 
 	logger := zap.New(core, zap.AddCaller())
@@ -489,6 +557,7 @@ func getEncoder() zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(encoderConfig)
 }
 
+// 切割日志
 func getLogWriter() zapcore.WriteSyncer {
 	lumberJackLogger := &lumberjack.Logger{
 		Filename:   "./test.log",
