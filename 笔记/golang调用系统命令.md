@@ -402,9 +402,9 @@ func main() {
 
 
 
+# ssh连接执行交互命令
 
-
-
+https://www.cnblogs.com/zhzhlong/p/12552410.html
 
 
 
