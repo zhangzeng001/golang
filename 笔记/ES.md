@@ -474,7 +474,7 @@ func main() {
 	tweet1 := Person{User: "olivere", Message: "Take Five", Retweets: 0}
 	put1, err := client.Index().
 		Index(indexName).
-		Id("1").
+		Id("1"). // 注释id会随机生成，否则插入只更新id为1的数据
 		BodyJson(tweet1).
 		Do(context.Background())
 	if err != nil {
