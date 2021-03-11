@@ -122,6 +122,74 @@ type error interface {
 
 
 
+## 得到错误输出
+
+```go
+package main
+
+import (
+	"io/ioutil"
+	"log"
+	"os/exec"
+)
+
+//runInLinux 执行系统命令
+func RunLinuxCmd(intputCmd string) (string, error) {
+	//fmt.Println("Running Linux cmd:" + cmd)
+	//创建获取命令输出管道
+	cmd := exec.Command("/bin/bash", "-c", intputCmd)
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Printf("Error:can not obtain stdout pipe for command:%s\n", err)
+		return "",err
+	}
+    // --------------------这里----------------------
+	stderr,_ := cmd.StderrPipe()
+
+	//执行命令
+	if err = cmd.Start(); err != nil {
+		log.Println("Error:The command is err,", err)
+		return "",err
+	}
+
+	//读取所有正常输出
+	stdoutBytes, err := ioutil.ReadAll(stdout)
+	if err != nil {
+		log.Println("==> ",intputCmd," ReadAll Stdout:", err.Error())
+		return "",err
+	}
+    //--------------------这里----------------------
+	// 读取所有错误输出
+	stderrBytes, err := ioutil.ReadAll(stderr)
+	if err != nil {
+		log.Println("==> ",intputCmd," ReadAll Stdout:", err.Error())
+		return "",err
+	}
+
+	if err = cmd.Wait(); err != nil {
+        // --------------------这里----------------------
+		// log.Printf("==> %v wait: %v", intputCmd,string(stderrBytes))
+		log.Println("==> 命令执行失败",intputCmd," wait:", err.Error())
+		return string(stderrBytes),err
+	}
+	log.Printf("==> 命令执行成功: %s\n", intputCmd)
+	return string(stdoutBytes), err
+
+	//result, err := exec.Command("/bin/sh", "-c", intputCmd).Output()
+	//if err != nil {
+	//	return "", err
+	//}
+	//return strings.TrimSpace(string(result)), err
+}
+
+func main() {
+    res,_ := RunLinuxCmd("ifconfig")
+    fmt.Println(res)
+}
+```
+
+
+
 
 
 linux打包
@@ -152,7 +220,7 @@ https://blog.csdn.net/dirk2014/article/details/53700435
 
 # 示例：
 
-## 通过接口重启某个只能单词执行的服务
+## 通过接口重启某个只能单次执行的服务
 
 ```go
 package main
