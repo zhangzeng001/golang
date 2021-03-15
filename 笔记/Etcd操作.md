@@ -690,6 +690,12 @@ etcdctl del --from-key b   # 返回 2 删除了两个键
 etcdctl --endpoints=172.21.0.14:2379 del --prev-kv /key2
 ```
 
+清除所有数据
+
+```js
+etcdctl del / --prefix
+```
+
 ### watch
 
  watch 监测一个键值的变化，一旦键值发生更新，就会输出最新的值并退出。 
