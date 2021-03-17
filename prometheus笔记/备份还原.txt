@@ -1,0 +1,30 @@
+https://www.cnblogs.com/zqj-blog/p/12205063.html
+
+
+备份迁移
+
+https://www.bboy.app/2020/07/01/prometheus%E5%A4%87%E4%BB%BD%E8%BF%81%E7%A7%BB/
+
+简介
+原来的prometheus是存放在一台配置很低的机器上的，磁盘io也不太好，所以现在准备迁移到一台配置比较好的机器上
+
+操作
+常规的迁移做法就是关闭prometheus的容器，然后迁移整个文件夹到新的机器中，但是这样做启动可能会报错，比如我就碰到了
+
+opening storage failed: get segment range: segments are not sequential
+
+所以常规的最安全的做法就是先给prometheus创建一个快照，之后迁移快照中的数据，给prometheus创建快照只要一个post请求就可以了
+
+curl -XPOST http://localhost:9090/api/v1/admin/tsdb/snapshot
+
+之后rsync快照到新的机器
+
+rsync -pgoav --progress root@192.168.1.1:/data/prometheus/prometheus-data/data/snapshots .
+
+默认快照是创建在prometheus数据目录的snapshots下面，如果你要删除快照那么就直接删除对应的文件夹就可以了，因为快照是直接创建硬链接，所以对磁盘占用的体积是很小的
+
+对于快照的详细说明可以看prometheus的文档
+
+https://prometheus.io/docs/prometheus/latest/querying/api/
+
+迁移完成之后把快照中的所有数据直接覆盖到prometheus的数据目录然后启动prometheus就好了
