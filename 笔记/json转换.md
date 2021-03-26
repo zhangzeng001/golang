@@ -19,7 +19,7 @@ json序列化方法
 * channel、complex、function是不能被编码成JSON的
 * 指针在编码的时候会输出指针指向的内容，二空指针会输出null
 
-map 转 JSON
+## map 转 JSON
 
 ```go
 package main

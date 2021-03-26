@@ -277,19 +277,19 @@ http_requests_total{code="200",handler="query_range",instance="localhost:9090",j
 
 
 
-### 使用集合运算符
+### 逻辑运算符
 
-使用瞬时向量表达式能够获取到一个包含多个时间序列的集合，我们称为瞬时向量。 通过集合运算，可以在两个瞬时向量与瞬时向量之间进行相应的集合操作。目前，Prometheus支持以下集合运算符：
+使用瞬时向量表达式能够获取到一个包含多个时间序列的集合，我们称为瞬时向量。 通过集合运算，可以在两个瞬时向量与瞬时向量之间进行相应的集合操作。目前，Prometheus支持以下逻辑运算符：
 
 - `and` (并且)
 - `or` (或者)
 - `unless` (排除)
 
-***vector1 and vector2\*** 会产生一个由vector1的元素组成的新的向量。该向量包含vector1中完全匹配vector2中的元素组成。
+**vector1 and vector2** 会产生一个由vector1的元素组成的新的向量。该向量包含vector1中完全匹配vector2中的元素组成。
 
-***vector1 or vector2\*** 会产生一个新的向量，该向量包含vector1中所有的样本数据，以及vector2中没有与vector1匹配到的样本数据。
+**vector1 or vector2** 会产生一个新的向量，该向量包含vector1中所有的样本数据，以及vector2中没有与vector1匹配到的样本数据。
 
-***vector1 unless vector2\*** 会产生一个新的向量，新向量中的元素由vector1中没有与vector2匹配的元素组成。
+**vector1 unless vector2** 会产生一个新的向量，新向量中的元素由vector1中没有与vector2匹配的元素组成。
 
 ### 操作符优先级
 
