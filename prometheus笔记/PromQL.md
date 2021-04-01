@@ -400,15 +400,126 @@ method_code:http_errors:rate5m / ignoring(code) group_left method:http_requests:
 
 
 
+# 内置函数
+
+## 数学函数
 
 
 
+* `abs() `       # 绝对值或对数
+
+  ```shell
+  abs(process_virtual_memory_max_bytes{job="consul_sd_node_exporter2"})
+  结果：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}	1
+  ```
+
+* `sqrt() `     # 返回平方根
+
+* `round()`   # 四舍五入，取整数
+
+  ```shell
+  round(go_gc_duration_seconds_sum)   # 0.822122734
+  结果：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}	1
+  ```
+
+* `clamp_max()`和`clamp_min()`   # 允许返回值的上下限
+
+  例如：
+
+  ```shell
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}     51
+  ```
+
+  设置上限
+
+  ```shell
+  clamp_max(process_open_fds,10)   # 最大值只能为10，所以返回10
+  结果：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}	 10
+  
+  clamp_max(process_open_fds,100)  # 上限超过实际值，可返回实际值
+  结果：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"} 	 51
+  ```
+
+  
+
+## 时间函数
+
+Prometheus使用UTC时间，没有时区概念。为了使用户在使用中不用自己实现与日期相关的逻辑，Prometheus提供了一些时间函数。
+
+* `time()`  返回当前unix时间戳类型时间格式
+
+  ```shell
+  time()      # 	1616732968.243
+  转换为格式化时间
+  [root@18af6d067500 /]# date -d @1616732968.243 "+%Y-%m-%d %H:%M:%S"
+  2021-03-26 04:29:28
+  ```
+
+  例如: 查看进程运行时间
+
+  ```shell
+  (time()-process_start_time_seconds)/60/60
+  结果：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}	240.04205277780693
+  ```
+
+* `minute()`    # 返回UTC时间分钟数  0-59
+
+* `hour()`        # 返回UTC时间小事数  0-23
+
+* `day_of_week()`      # 返回UTC每个时间是星期几   0-6，0为周日
+
+* `day_of_mouth()`    # 返回UTC每个时间是一个月的第几天  1-31
+
+* `day_in_mouth()`    # 返回UTC每个月的天数   28-31
+
+* `mouth()`      # 返回UTC时间所在的月份 1-12
+
+* `year()`        # 以UTC时间 返回给定时间的年份
+
+  例如查看进程是哪一年启动的
+
+  ```shell
+  year(process_start_time_seconds)
+  返回：
+  {instance="172.16.1.171:32774",job="consul_sd_node_exporter2"}	2021
+  ```
+
+## 标签操作函数
+
+ P110
+
+* `label_replace()`      # 通过正则匹配取值设置标签
+* `label_join()`            # 取几个标签的值连接标并设置新标签值
 
 
 
+## Counter增长率
+
+* `increase()`    # 返回区间时间的增长量
+
+  ```shell
+  # 返回3分钟的增长量，除喵叔返回增长率
+  increase(process_cpu_seconds_total[3m])/180
+  ```
+
+* `rate()`            # 每秒平均增长率，适合计算长时间增长率分析
+
+* `irate()`          # 瞬时增长率，灵敏度更高
+
+## Gauge 指标趋势变化预测
+
+* `predict_linear()`  # 一段时间内某个指标的变化趋势做出预测
 
 
 
+# PromQl查询分析
+
+P112
 
 
 
