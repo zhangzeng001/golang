@@ -24,34 +24,7 @@ import "github.com/gin-gonic/gin"
 import "net/http"
 ```
 
-## 使用 [Govendor](https://github.com/kardianos/govendor) 工具创建项目(未使用)
-
-1.`go get govendor`
-
-```sh
-$ go get github.com/kardianos/govendor
-```
-
-2.创建项目并且 `cd` 到项目目录中
-
-```sh
-$ mkdir -p $GOPATH/src/github.com/myusername/project && cd "$_"
-```
-
-3.使用 govendor 初始化项目，并且引入 gin
-
-```sh
-$ govendor init
-$ govendor fetch github.com/gin-gonic/gin@v1.3
-```
-
-4.复制启动文件模板到项目目录中
-
-```sh
-$ curl https://raw.githubusercontent.com/gin-gonic/examples/master/basic/main.go > main.go
-```
-
-5.启动项目
+4.启动项目
 
 ```sh
 $ go run main.go
@@ -84,9 +57,9 @@ func main() {
 
 
 
-# 示例
+# AsciiJSON
 
-## AsciiJSON
+ 使用 AsciiJSON 生成具有转义的非 ASCII 字符的 ASCII-only JSON。 
 
 ```golang
 package main
@@ -98,6 +71,7 @@ import (
 
 func main() {
 	r := gin.Default()
+	// 定义一个ping接口，返回pong
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
@@ -109,6 +83,7 @@ func main() {
 		S2 interface{} `json:"ssss2"`
 	}
 
+	// 构建一个数据作为返回json
 	data1 := d{
 		S1: "111",
 		S2: "222",
@@ -131,6 +106,261 @@ func main() {
 }
 
 ```
+
+
+
+# 路由
+
+## 路由参数
+
+单匹配
+
+```shell
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+// 定义一个处理路由的函数，传参必须为(c *gin.Context)，Param为取值对应路由定义:xxx
+func users(c *gin.Context){
+	name := c.Param("name")
+	c.String(http.StatusOK,"Hello %s",name)
+}
+
+func main() {
+	r := gin.Default()
+	// 定义一个路由，定义获取参数key为name，param取值的名称
+	r.GET("/user/:name" ,users)
+
+	r.Run(":8080")
+}
+```
+
+结果：
+
+```http
+# GET http://localhost:8080/user/zhang3
+Hello zhang3
+```
+
+
+
+匹配多个
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+// 定义一个处理路由的函数，传参必须为(c *gin.Context)，Param为取值对应路由定义:xxx
+func users(c *gin.Context){
+	action := c.Param("acion")
+	//name := c.Param("name")
+	//message := name + action
+	//c.String(http.StatusOK,"Hello %s",message)
+	c.String(http.StatusOK,"Hello %s",action)
+}
+
+func main() {
+	r := gin.Default()
+	// 定义一个路由，定义匹配的参数key为action，param取值的名称
+	r.GET("/user/:name/*action" ,users)
+
+	r.Run(":8080")
+}
+```
+
+结果：
+
+```http
+# GET http://localhost:8080/user/zhang3/asdfasdfaction/adsfasdf
+Hello /asdfasdfaction/adsfasdf
+```
+
+
+
+## url参数
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+type User struct {
+	Username string `form:"username"`
+	Password string `form:"password"`
+}
+
+func main() {
+	r := gin.Default()
+	r.POST("/login",login)
+
+	r.Run(":8080")
+}
+
+func login(c *gin.Context)  {
+	var user User
+	err := c.ShouldBindQuery(&user)
+	if err != nil {
+		fmt.Println("参数错误")
+		c.String(http.StatusOK,"参数错误!")
+	}
+	message := user.Username +" "+ user.Password
+	c.String(http.StatusOK,"Url Params is %s",message)
+}
+```
+
+结果
+
+```shell
+$ POST http://localhost:8080/login?username=zhang3&password=123
+Url Params is zhang3 123
+```
+
+
+
+## body参数
+
+* 简单示例
+
+  ```go
+  package main
+  
+  import (
+  	"github.com/gin-gonic/gin"
+  	"net/http"
+  )
+  
+  func main() {
+  	router := gin.Default()
+  	router.POST("/login", events)
+  	router.Run(":8080")
+  }
+  
+  func events(c *gin.Context) {
+  	buf := make([]byte, 1024)
+  	n, _ := c.Request.Body.Read(buf)
+  	c.String(http.StatusOK,string(buf[0:n]))
+  }
+  ```
+
+  执行结果
+
+  ```shell
+  $ POST http://localhost:8080/login?username=zhang3&password=123
+  {
+      "username":"zhang3",
+      "password":"123"
+  }
+  ```
+
+  
+
+* body转结构体
+
+  ```go
+  package main
+  
+  import (
+  	"encoding/json"
+  	"github.com/gin-gonic/gin"
+  	"net/http"
+  )
+  
+  // 接收body json的结构体
+  type User struct {
+  	Username string `form:"username"`
+  	Password string `form:"password"`
+  }
+  
+  func main() {
+  	router := gin.Default()
+  	router.POST("/login", events)
+  	router.Run(":8080")
+  }
+  
+  func events(c *gin.Context) {
+      // 初始化结构体
+  	var user User
+      // 接受数据
+  	buf := make([]byte, 1024)
+  	n, _ := c.Request.Body.Read(buf)
+      // json解析到结构体
+      _ = json.Unmarshal([]byte((buf[0:n])),&user)
+  
+  	c.String(http.StatusOK,user.Username+" "+user.Password)
+  }
+  ```
+
+  执行结果：
+
+  ```shell
+  $ POST http://localhost:8080/login
+  zhang3 123
+  ```
+
+  
+
+
+
+
+
+## 路由组
+
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+func main() {
+	r := gin.Default()
+	v1 := r.Group("v1")
+	{
+		v1.GET("/login",login)
+		v1.GET("/status",status)
+	}
+	v2 := r.Group("v2")
+	{
+		//v2.GET("/xxxx",xxxx)
+	}
+	r.Run(":8080")
+}
+func login(c *gin.Context)  {
+	c.String(http.StatusOK,"login")
+}
+func status(c *gin.Context)  {
+	c.String(http.StatusOK,"status")
+}
+```
+
+结果：
+
+```shell
+$ GET http://localhost:8080/v1/login
+login
+$ GET http://localhost:8080/v1/status
+status
+```
+
+
+
+
+
+
+
+
 
 # HTML 渲染
 
@@ -361,7 +591,179 @@ templates/users.html
   }
   ```
 
+  raw.tmpl
   
+  ```go
+  Date: {[{.now | formatAsDate}]}
+  ```
+  
+  
+
+# 上传文件
+
+**multipart forms 设置较低的内存限制 (默认是 32 MiB)**，并不是限制上传文件大小
+
+自定义上传文件大小 1<< 20 为 1MB
+
+```go
+router.MaxMultipartMemory = 8 << 20  // 8 MiB
+```
+
+## 上传单个文件
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+const uploaddir = "uploaddir"
+func main() {
+	router := gin.Default()
+	// 为 multipart forms 设置较低的内存限制 (默认是 32 MiB)
+	router.MaxMultipartMemory = 8 << 20  // 8 MiB
+	router.POST("/upload", upload)
+	router.Run(":8080")
+}
+
+//单文件上传
+func upload(c *gin.Context) {
+	//获取文件头
+	file, err := c.FormFile("file-file2")
+	if err != nil {
+		c.String(http.StatusBadRequest, "请求失败")
+		return
+	}
+	//获取文件名
+	fileName := file.Filename
+	fmt.Println("文件名：", fileName)
+	//保存文件到服务器本地
+	//SaveUploadedFile(文件头，保存路径)
+	if err = c.SaveUploadedFile(file, uploaddir+"/"+fileName); err != nil {
+		c.String(http.StatusBadRequest, "保存失败 Error:%s", err.Error())
+		return
+	}
+	c.String(http.StatusOK, "上传文件成功")
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" action="http://127.0.0.1:8080/upload" enctype='multipart/form-data'>
+    <input type="file" name="file-file2">
+    <input type="submit" name="提交">
+</form>
+</body>
+</html>
+```
+
+测试：
+
+```shell
+$ curl -X POST http://localhost:8080/upload \
+  -F "file=@/Users/appleboy/test.zip" \
+  -H "Content-Type: multipart/form-data"
+  
+ 文件上传成功
+```
+
+
+
+## 上传多个文件
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+)
+
+const uploaddir = "uploaddir"
+func main() {
+	router := gin.Default()
+	// 为 multipart forms 设置较低的内存限制 (默认是 32 MiB)
+	router.MaxMultipartMemory = 8 << 20  // 8 MiB
+	router.POST("/upload", upload)
+	router.Run(":8080")
+}
+
+//单文件上传
+func upload(c *gin.Context) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.String(http.StatusBadRequest, "请求失败")
+		return
+	}
+	files := form.File["file-file2[]"]
+
+	for _,file := range files{
+		log.Println(file.Filename)
+
+		// 上传文件至指定目录
+		_ = c.SaveUploadedFile(file,uploaddir+"/"+file.Filename)
+	}
+	c.String(http.StatusOK,fmt.Sprintf("%d files uploaded!", len(files)))
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form method="post" action="http://127.0.0.1:8080/upload" enctype='multipart/form-data'>
+    <input type="file" name="file-file2[]" multiple>
+    <input type="submit" name="提交">
+</form>
+
+</body>
+</html>
+```
+
+测试：
+
+```shell
+$ curl -X POST http://localhost:8080/upload \
+  -F "upload[]=@/Users/appleboy/test1.zip" \
+  -F "upload[]=@/Users/appleboy/test2.zip" \
+  -H "Content-Type: multipart/form-data"
+```
+
+
+
+# form表单
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

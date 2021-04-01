@@ -71,7 +71,7 @@ func main(){
 		"li4": []string{"c","d"},
 	}
 	fmt.Println(m) // map[li4:[c d] zhang3:[a b]]
-	// 将 map 解析为json格式
+	// 将 map 解析为json格式,MarshalIndent为重端便于阅读的格式
 	if data,err := json.MarshalIndent(m,"","    ") ; err==nil{
 		fmt.Printf("%s\n",data)
 		fmt.Printf("%T\n",data)  //[]uint8
@@ -159,7 +159,7 @@ func main(){
 
 # JSON 解析
 
-## JSON转切片
+## JSON转切片类型的map
 
 ```go
 package main
