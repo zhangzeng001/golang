@@ -4,7 +4,7 @@ https://zhuanlan.zhihu.com/p/27328476
 
 # Golang的runtime
 
-![1610165780370](D:\go笔记\notes\笔记\Golang的runtime.assets\1610165780370.png)
+![1610165780370](Golang的runtime.assets\1610165780370.png)
 
 ## runtime概述
 
@@ -16,7 +16,7 @@ https://zhuanlan.zhihu.com/p/27328476
 
 ​         首先说到调度，我们学习操作系统时知道，对于CPU时间片的调度，是系统的资源分配策略，如任务A在执行完后，选择哪个任务来执行，使得某个因素（如进程总执行时间，或者磁盘寻道时间等）最小，达到最优的服务。这就是调度关注的问题。那么Go的运行时的scheduler是什么呢？我们为什么需要它，因为我们知道OS内核已经有一个线程（进程）scheduler了嘛？ 
 
-![1610166096932](D:\go笔记\notes\笔记\Golang的runtime.assets\1610166096932.png)
+![1610166096932](Golang的runtime.assets\1610166096932.png)
 
 ​        为什么Go还要自己搞一套？想想我们是不是经常说Go牛逼啊，语言级别实现了并发，我们为什么会这样说呢？原因就在于此，Go有自己的scheduler。 
 
@@ -52,7 +52,7 @@ https://zhuanlan.zhihu.com/p/27328476
 // The new G calls runtime·main.
 ```
 
-![1610166417054](D:\go笔记\notes\笔记\Golang的runtime.assets\1610166417054.png)
+![1610166417054](Golang的runtime.assets\1610166417054.png)
 
 想要明白详细的流程可见：[golang internals - Genius0101 - 博客园](https://link.zhihu.com/?target=http%3A//www.cnblogs.com/genius0101/archive/2012/04/16/2447147.html)那么scheduler究竟解决了什么问题并如何管理goruntines呢？
 *全部拷贝*

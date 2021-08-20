@@ -4,6 +4,8 @@
 
 [github](https://github.com/gin-gonic/gin#installation)
 
+https://www.flysnow.org/search/?q=gin&sitesearch=https%3A%2F%2Fwww.flysnow.org
+
 # 安装
 
 1.下载并安装 gin：
@@ -34,7 +36,7 @@ $ go run main.go
 
 # resetfull 接口
 
-```
+```go
 func main() {
 	// Creates a gin router with default middleware:
 	// logger and recovery (crash-free) middleware
@@ -59,7 +61,7 @@ func main() {
 
 # AsciiJSON
 
- 使用 AsciiJSON 生成具有转义的非 ASCII 字符的 ASCII-only JSON。 
+使用 AsciiJSON 生成具有转义的非 ASCII 字符的 ASCII-only JSON。 
 
 ```golang
 package main

@@ -23,7 +23,7 @@ LOOP:
 		fmt.Println("worker")
 		time.Sleep(time.Second)
 		select {
-		// 等待上级通知
+		// 等待上级通知，指针接收到值则跳出该循环，结束goroutine
 		case <-ctx.Done(): 
 			break LOOP
 		default:

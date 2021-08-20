@@ -123,7 +123,13 @@ etcd通过配置文件，多命令行参数和环境变量进行配置，
 **--data-dir**
 
 - 数据目录的路径
+
+- ```
+  --data-dir=/data/etcd/default.etcd
+  ```
+
 - 默认值："${name}.etcd"  ，当前目录下的xxx.etcd目录，可以指定绝对路劲
+
 - 环境变量：ETCD_DATA_DIR
 
 **--wal-dir**

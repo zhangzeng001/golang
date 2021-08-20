@@ -600,3 +600,16 @@ https://github.com/fefit/dateutil
 
 
 
+# 5 10 15分钟时间间隔计算案例
+
+```shell
+func loadAvgGoroutine() {
+	var (
+		samplingFrequency time.Duration = 5 * time.Second
+		loadAvgFactor1M   float64       = 1 / math.Exp(samplingFrequency.Seconds()/time.Minute.Seconds())
+		loadAvgFactor5M   float64       = 1 / math.Exp(samplingFrequency.Seconds()/(5*time.Minute).Seconds())
+		loadAvgFactor15M  float64       = 1 / math.Exp(samplingFrequency.Seconds()/(15*time.Minute).Seconds())
+		currentLoad       float64
+	)
+```
+
