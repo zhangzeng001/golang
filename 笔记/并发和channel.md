@@ -309,7 +309,7 @@ main.main()
 
 上面的代码会阻塞在`ch <- 10`这一行代码形成死锁，那如何解决这个问题呢？
 
-<font color=FF0000>一种方法是启用一个`goroutine`去接收值,同一程序内只要又goroutine取值就不会panic</font>，例如：
+<font color=FF0000>一种方法是启用一个`goroutine`去接收值,同一程序内只要有goroutine取值就不会panic</font>，例如：
 
 ```go
 func recv(c chan int) {
@@ -369,7 +369,7 @@ func main() {
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 
-	// 开启goroutine 将0-100发送到ch1
+	// 开启goroutine 将0-10发送到ch1
 	go func(){
 		for i:=0;i<10;i++{
 			ch1 <- i
@@ -397,7 +397,7 @@ func main() {
 }
 ```
 
-从上面的例子中我们看到有两种方式在接收值的时候判断该通道是否被关闭，不过我们通常使用的是`for range`的方式。<font color=FF0000>使用`for range`遍历通道，当通道被关闭的时候就会退出`for range`。 </font>
+从上面的例子中我们看到有两种方式在接收值的时候判断该通道是否被关闭，不过我们通常使用的是`for range`的方式。<font color=FF0000>使用`for range`遍历通道，当通道被关闭的时候就会退出`for range`不关闭会一直阻塞。 </font>
 
 ```go
 package main

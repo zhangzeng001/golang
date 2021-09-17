@@ -22,7 +22,7 @@ Zap提供了两种类型的日志记录器—`Sugared Logger`和`Logger`。
 
 ## Logger
 
-```
+```go
 func NewProduction(options ...Option) (*Logger, error)
 ```
 
@@ -326,8 +326,19 @@ func getEncoder() zapcore.Encoder {
 func getEncoder() zapcore.Encoder {
     // 非json输出
 	encoderConfig := zap.NewProductionEncoderConfig()
+    // zap.NewProductionEncoderConfig() json
     // 时间编码
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+    // json类型时间字段key
+    // MessageKey：输入信息的key名
+    // LevelKey：输出日志级别的key名
+    // TimeKey：输出时间的key名
+    // encoderConfig.TimeKey = "time"
+    // NameKey CallerKey StacktraceKey跟以上类似，看名字就知道
+    // 一般zapcore.SecondsDurationEncoder,执行消耗的时间转化成浮点型的秒
+    //  encoderConfig.EncodeDuration = zapcore.SecondsDurationEncoder
+    // EncodeCaller：一般zapcore.ShortCallerEncoder，以包/文件:行号 格式化调用堆栈
+    // LineEnding：每行的分隔符。基本zapcore.DefaultLineEnding 即"\n"
     // 日志级别大写
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 	return zapcore.NewConsoleEncoder(encoderConfig)
@@ -420,6 +431,15 @@ EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString(t.Format("2006-01-02 15:04:05"))
 		},
 ```
+
+```go
+func getEncoder() zapcore.Encoder {
+	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	return zapcore.NewConsoleEncoder(encoderConfig)
+}
+```
+
+
 
 ## 增加自定义字段和值
 
@@ -607,7 +627,7 @@ https://www.cnblogs.com/chaselogs/p/9964424.html
 
 https://github.com/go-ini/ini
 
-
+https://www.liwenzhou.com/posts/Go/go_logrus/
 
 
 

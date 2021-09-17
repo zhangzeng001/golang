@@ -112,7 +112,7 @@ type Context interface {
 
 其中：
 
-- `Deadline`方法需要返回当前`Context`被取消的时间，也就是完成工作的截止时间（deadline）；
+- `Deadline`方法需要返回当前`Context`被取消的时间，也就是完成工作的截止时间（deadline）。第一个返回值为截止时间，到了这个时间点，Context会自动发起取消请求，第二个返回值为fanlse时，表示没有设置截止时间，如果要取消，则需要调用取消函数（cancel）；
 - `Done`方法需要返回一个`Channel`，这个Channel会在当前工作完成或者上下文被取消之后关闭，多次调用`Done`方法会返回同一个Channel；
 
 *  `Err`方法会返回当前`Context`结束的原因，它只会在`Done`返回的Channel被关闭时才会返回非空的值； 
@@ -144,6 +144,8 @@ func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
 ```
 
 `WithCancel`返回带有新Done通道的父节点的副本。当调用返回的cancel函数或当关闭父上下文的Done通道时，将关闭返回上下文的Done通道，无论先发生什么情况。
+
+传递一个服Contet作为参数，返回子context及一个取消方法来取消Context；
 
 取消此上下文将释放与其关联的资源，因此代码应该在此上下文中运行的操作完成后立即调用cancel。
 
@@ -187,6 +189,10 @@ func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc)
 ```
 
 返回父上下文的副本，并将deadline调整为不迟于d。如果父上下文的deadline已经早于d，则WithDeadline(parent, d)在语义上等同于父上下文。当截止日过期时，当调用返回的cancel函数时，或者当父上下文的Done通道关闭时，返回上下文的Done通道将被关闭，以最先发生的情况为准。
+
+与withCancel功能一样，不通的是withDeadline方法会多传递一个截止时间参数，这意味着到了这个还时间点会自动取消Context，也可以通过取消方法提前取消
+
+
 
 取消此上下文将释放与其关联的资源，因此代码应该在此上下文中运行的操作完成后立即调用cancel。
 
